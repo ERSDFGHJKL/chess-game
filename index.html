@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Chess Game</title>
+  <link rel="stylesheet" href="https://unpkg.com/chessboardjs@1.0.0/www/css/chessboard.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding-top: 30px;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Chess Game</h1>
+  <div id="board" style="width: 400px"></div>
+  <p id="status"></p>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="https://unpkg.com/chessboardjs@1.0.0/www/js/chessboard.js"></script>
+  <script>
+    const game = new Chess();
+
+    function onDragStart(source, piece) {
+      if (game.isGameOver() || (game.turn() === 'w' && piece.startsWith('b')) || (game.turn() === 'b' && piece.startsWith('w'))) {
+        return false;
+      }
+    }
+
+    function onDrop(source, target) {
+      const move = game.move({
+        from: source,
+        to: target,
+        promotion: 'q'
+      });
+
+      if (move === null) return 'snapback';
+      updateStatus();
+    }
+
+    function onSnapEnd() {
+      board.position(game.fen());
+    }
+
+    function updateStatus() {
+      let status = '';
+      if (game.inCheckmate()) {
+        status = 'Checkmate! ' + (game.turn() === 'w' ? 'Black' : 'White') + ' wins!';
+      } else if (game.inDraw()) {
+        status = 'Draw!';
+      } else {
+        status = (game.turn() === 'w' ? 'White' : 'Black') + ' to move';
+        if (game.inCheck()) {
+          status += ' (Check)';
+        }
+      }
+      document.getElementById('status').textContent = status;
+    }
+
+    const board = Chessboard('board', {
+      draggable: true,
+      position: 'start',
+      onDragStart: onDragStart,
+      onDrop: onDrop,
+      onSnapEnd: onSnapEnd
+    });
+
+    updateStatus();
+  </script>
+</body>
+</html>
